@@ -1,7 +1,7 @@
 # CZ3006-Net_Centric_Computing Sliding Window Protocol
 
-This assignment aims to demonstrate the student understanding of the network protocol hierarchy and flow control and error control techniques by implementing a sliding window protocol using an ideal retransmission strategy in a simulated communication network system. The assignment will be build based on Java programming language.
-This network simulator will demonstrate and simulate a physical transmission media with 2 communicating virtual machines. The simulator can be operated at 4 levels of quality:
+This assignment aims to demonstrate the student understanding of the network protocol hierarchy and flow control and error control techniques by implementing a sliding window protocol using an ideal retransmission strategy in a simulated communication network system. The assignment will be built on Java programming language.
+This network simulator will demonstrate and simulate a physical transmission media with 2 communicating virtual machines. The simulator can be operated on 4 levels of quality
 -	Level 0: error-free transmission media
 -	Level 1: transmission may lose frames
 -	Level 2: transmission may damage frames (generating checksum-errors)
