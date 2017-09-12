@@ -90,7 +90,7 @@ public class SWP {
    /*
     * Author: Thomas Lim Jun Wei
     * Matric No.: U1521407L
-    * Lab Group: SSP4
+    * Lab Group: SSP5
     */
    
    // implement retransmission here
@@ -329,11 +329,8 @@ public class SWP {
 /* Note: In class SWE, the following two public methods are available:
    . generate_acktimeout_event() and
    . generate_timeout_event(seqnr).
-
    To call these two methods (for implementing timers),
    the "swe" object should be referred as follows:
      swe.generate_acktimeout_event(), or
      swe.generate_timeout_event(seqnr).
 */
-
-
