@@ -1,4 +1,3 @@
-//import javax.management.timer.Timer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -133,7 +132,6 @@ public class SWP {
        return ((x <= y) && (y < z)) || ((z < x) && (x <= y)) || ((y < z) && (z < x));
    }
  
-   
    // Method to transmit frame
    private void send_frame(int frame_type, int frame_no, int receiver_lowerEdge, Packet buffer[]){
 	   //temp frame
@@ -150,7 +148,6 @@ public class SWP {
 	   // for meaningful data frames
 	   s.seq = frame_no;
 	   s.ack = (receiver_lowerEdge + MAX_SEQ) % (MAX_SEQ + 1);
-	   //s.ack = s.ack % (MAX_SEQ + 1);
 	   
 	   //one NAK per frame
 	   if (frame_type == PFrame.NAK)
@@ -158,6 +155,7 @@ public class SWP {
 		   
 	   // send frame from physical layer
 	   to_physical_layer(s);
+	   
 	   if(frame_type == PFrame.DATA)
 		   start_timer(frame_no);
 	  
@@ -218,35 +216,36 @@ public class SWP {
 		      			send_frame(PFrame.NAK, 0, receiver_lowerEdge, out_buf);
 		      		else
 		      			start_ack_timer();
+		      		
+		      		// check if incoming frame is between the sliding window
+		      		// if it has not been prev recieved, allow frame to accept in any order of arrival
+		      		if (between(receiver_lowerEdge, frame_temporary.seq, receiver_upperEdge) && received[frame_temporary.seq % NR_BUFS] == false){
+		      			
+		      			// allow buffer to be accepted in any order of arrival in the reciever side
+		      			received[frame_temporary.seq % NR_BUFS] = true;
+		      			
+		      			// insert data into buffer
+		      			in_buf[frame_temporary.seq % NR_BUFS] = frame_temporary.info;
+		      			
+		      			while(received[receiver_lowerEdge % NR_BUFS]){
+		      				// pass frame from Physical > network, then advance window edge
+		      				to_network_layer(in_buf[receiver_lowerEdge % NR_BUFS]);
+		      				no_nak = true;
+		      				
+		      				// mark undamaged frame as received
+		      				received[receiver_lowerEdge % NR_BUFS] = false;
+		      				receiver_lowerEdge = inc(receiver_lowerEdge);
+		      				receiver_upperEdge = inc(receiver_upperEdge);
+		      				
+		      				// start ack timer
+		      				start_ack_timer();
+		      			}
+		      		}
 		      	}
-	    	
-		    	// check if incoming frame is between the sliding window
-	      		// if it has not been prev recieved, allow frame to accept in any order of arrival
-	      		if (between(receiver_lowerEdge, frame_temporary.seq, receiver_upperEdge) && received[frame_temporary.seq % NR_BUFS] == false){
-	      			
-	      			// indicate that buffer is full
-	      			received[frame_temporary.seq % NR_BUFS] = true;
-	      			
-	      			// insert data into buffer
-	      			in_buf[frame_temporary.seq % NR_BUFS] = frame_temporary.info;
-	      			
-	      			while(received[receiver_lowerEdge % NR_BUFS]){
-	      				// pass frame from Physical > network, then advance window edge
-	      				to_network_layer(in_buf[receiver_lowerEdge % NR_BUFS]);
-	      				no_nak = true;
-	      				
-	      				// mark undamaged frame as received
-	      				received[receiver_lowerEdge % NR_BUFS] = false;
-	      				receiver_lowerEdge = inc(receiver_lowerEdge);
-	      				receiver_upperEdge = inc(receiver_upperEdge);
-	      				
-	      				// start ack timer
-	      				start_ack_timer();
-	      			}
-	      		}
 		      	
 		    	// if NAK frame arrived, check frame is between expected frames of SW 
-	      		if (frame_temporary.kind == PFrame.NAK && between(sender_lowerEdge, ((frame_temporary.ack + 1) % (MAX_SEQ + 1)),sender_upperEdge)){
+	      		if (frame_temporary.kind == PFrame.NAK 
+	      				&& between(sender_lowerEdge, ((frame_temporary.ack + 1) % (MAX_SEQ + 1)),sender_upperEdge)){
 	      			// resent data of the frame which NAK received by sender
                     send_frame(PFrame.DATA, ((frame_temporary.ack + 1) % (MAX_SEQ + 1)), receiver_lowerEdge, out_buf);
 	      		}
@@ -283,6 +282,9 @@ public class SWP {
 			}
       }      
    }
+
+	
+
 
  /* Note: when start_timer() and stop_timer() are called, 
     the "seq" parameter must be the sequence number, rather 
