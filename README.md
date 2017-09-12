@@ -18,23 +18,23 @@ This network simulator will demonstrate and simulate a physical transmission med
 
 ## Setup/Deployment
 **Step 1:** Compile SWP.java 
-'''
+```
 javac SWP.java
-'''
+```
 
 **Step 2:** Start a network simulator by running the command with level of quality(0-3)
-'''
+```
 java NetSim 0
-'''
+```
 
 **Step 3:** Start two virtual on two different console window
-'''
+```
 java VMach 1
 java VMach 2
-'''
+```
 
-**Step 4:** Verify the two output files: 'receive_file_1.txt' & 'receive_file_2.txt' is generated. 
-If Sliding Window Protocol (Protocol 6) is implemented correctly, 'receive_file_1.txt' should be similar to 'send_file_2.txt' and vice versa for 'receive_file_2.txt' and 'send_file_1.txt'
+**Step 4:** Verify the two output files: `receive_file_1.txt` & `receive_file_2.txt` is generated. 
+If Sliding Window Protocol (Protocol 6) is implemented correctly, `receive_file_1.txt` should be similar to `send_file_2.txt` and vice versa for `receive_file_2.txt` and `send_file_1.txt`
 
 ## Author
 Thomas Lim Jun Wei
