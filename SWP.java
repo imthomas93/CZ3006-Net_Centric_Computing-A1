@@ -209,7 +209,7 @@ public class SWP {
 		    	// receive a frame 
 		    	from_physical_layer(frame_temporary);
 		      	
-		      	if (frame_temporary.kind == PFrame.DATA){
+		    	if (frame_temporary.kind == PFrame.DATA){
 		      		// correct frame arrived
 		      		
 		      		// if there is no acknowledgement and frame sequence number is not the expected frame at receiver side
@@ -218,37 +218,38 @@ public class SWP {
 		      			send_frame(PFrame.NAK, 0, receiver_lowerEdge, out_buf);
 		      		else
 		      			start_ack_timer();
-		      		
-		      		// check if incoming frame is between the sliding window
-		      		// if it has not been prev recieved, allow frame to accept in any order of arrival
-		      		if (between(receiver_lowerEdge, frame_temporary.seq, receiver_upperEdge) && received[frame_temporary.seq % NR_BUFS] == false){
-		      			
-		      			// indicate that buffer is full
-		      			received[frame_temporary.seq % NR_BUFS] = true;
-		      			
-		      			// insert data into buffer
-		      			in_buf[frame_temporary.seq % NR_BUFS] = frame_temporary.info;
-		      			
-		      			while(received[receiver_lowerEdge % NR_BUFS]){
-		      				// pass frame from Physical > network, then advance window edge
-		      				to_network_layer(in_buf[receiver_lowerEdge % NR_BUFS]);
-		      				no_nak = true;
-		      				
-		      				// mark undamaged frame as received
-		      				received[receiver_lowerEdge % NR_BUFS] = false;
-		      				receiver_lowerEdge = inc(receiver_lowerEdge);
-		      				receiver_upperEdge = inc(receiver_upperEdge);
-		      				
-		      				// start ack timer
-		      				start_ack_timer();
-		      			}
-		      		}	
 		      	}
+	    	
+		    	// check if incoming frame is between the sliding window
+	      		// if it has not been prev recieved, allow frame to accept in any order of arrival
+	      		if (between(receiver_lowerEdge, frame_temporary.seq, receiver_upperEdge) && received[frame_temporary.seq % NR_BUFS] == false){
+	      			
+	      			// indicate that buffer is full
+	      			received[frame_temporary.seq % NR_BUFS] = true;
+	      			
+	      			// insert data into buffer
+	      			in_buf[frame_temporary.seq % NR_BUFS] = frame_temporary.info;
+	      			
+	      			while(received[receiver_lowerEdge % NR_BUFS]){
+	      				// pass frame from Physical > network, then advance window edge
+	      				to_network_layer(in_buf[receiver_lowerEdge % NR_BUFS]);
+	      				no_nak = true;
+	      				
+	      				// mark undamaged frame as received
+	      				received[receiver_lowerEdge % NR_BUFS] = false;
+	      				receiver_lowerEdge = inc(receiver_lowerEdge);
+	      				receiver_upperEdge = inc(receiver_upperEdge);
+	      				
+	      				// start ack timer
+	      				start_ack_timer();
+	      			}
+	      		}
 		      	
 		    	// if NAK frame arrived, check frame is between expected frames of SW 
-	      		if (frame_temporary.kind == PFrame.NAK && between(sender_lowerEdge, ((frame_temporary.ack + 1) % (MAX_SEQ + 1)),sender_upperEdge))
-		      		// resent data of the frame which NAK received by sender
+	      		if (frame_temporary.kind == PFrame.NAK && between(sender_lowerEdge, ((frame_temporary.ack + 1) % (MAX_SEQ + 1)),sender_upperEdge)){
+	      			// resent data of the frame which NAK received by sender
                     send_frame(PFrame.DATA, ((frame_temporary.ack + 1) % (MAX_SEQ + 1)), receiver_lowerEdge, out_buf);
+	      		}
 	      		
 		      	while(between(sender_lowerEdge, frame_temporary.ack, sender_upperEdge)){
 	      			// if frame is undamaged and complete frame is delivered, prep next step
@@ -263,10 +264,9 @@ public class SWP {
 		      	
 		      	break;	   
 	    	case (PEvent.CKSUM_ERR):
-		    	  if (no_nak){
+		    	  if (no_nak)
 		    		  // damaged frame arrived
 		    		  send_frame(PFrame.NAK, 0, receiver_lowerEdge, out_buf);
-		    	  }
 	      	      break;  
 	    	case (PEvent.TIMEOUT): 
 		    	  // timer expired for frame, request resend
@@ -277,11 +277,10 @@ public class SWP {
 		    	  send_frame(PFrame.ACK, 0, receiver_lowerEdge, out_buf);
 		    	  break; 
             default: 
-            	System.out.println("SWP: undefined event type = " 
-                                       + event.type); 
+            	System.out.println("SWP: undefined event type = " + event.type); 
             	System.out.flush();
             	break;
-	   }
+			}
       }      
    }
 
@@ -293,7 +292,7 @@ public class SWP {
      
    // method to increase a index
    public static int inc(int numToInc){
-	   return ((numToInc + 1) % (MAX_SEQ +1));
+	   return ((numToInc + 1) % (MAX_SEQ+ 1));
    }
  
    private void start_timer(int seq) {
