@@ -89,7 +89,7 @@ public class SWP {
    /*
     * Author: Thomas Lim Jun Wei
     * Matric No.: U1521407L
-    * Lab Group: SSP4
+    * Lab Group: SSP5
     */
    
    // implement retransmission here
